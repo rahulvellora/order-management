@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // Generate Access & Refresh Tokens
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
-    { userId: user._id, email: user.email },
+    { userId: user._id, email: user.email, role: user.role},
     process.env.JWT_SECRET,
     { expiresIn: "15m" } // Short-lived access token
   );
@@ -19,10 +19,13 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
-// User Registration
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+
+    if (!["seller", "manufacturer", "customer", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role provided" });
+    }
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -32,7 +35,7 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({ name, email, password: hashedPassword, role });
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
@@ -40,6 +43,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: "Error registering user", error });
   }
 };
+
 
 // User Login
 exports.login = async (req, res) => {

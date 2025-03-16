@@ -4,7 +4,12 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  refreshToken: { type: String }, // Store refresh token securely
+  role: { 
+    type: String, 
+    enum: ["seller", "manufacturer", "customer", "admin"], 
+    required: true 
+  },
+  refreshToken: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
