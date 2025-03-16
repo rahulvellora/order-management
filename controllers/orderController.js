@@ -28,7 +28,13 @@ exports.getTopOrderedProducts = async (req, res) => {
 exports.getMonthlyOrders = async (req, res) => {
   try {
     const stats = await Order.aggregate([
-      { $group: { _id: { $month: "$createdAt" }, totalOrders: { $sum: 1 }, revenue: { $sum: "$price" } } },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          totalOrders: { $sum: 1 },
+          revenue: { $sum: "$price" },
+        },
+      },
       { $sort: { _id: 1 } },
     ]);
     res.json(stats);

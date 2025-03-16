@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // Generate Access & Refresh Tokens
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
-    { userId: user._id, email: user.email, role: user.role},
+    { userId: user._id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "15m" } // Short-lived access token
   );
@@ -29,7 +29,8 @@ exports.register = async (req, res) => {
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser)
+      return res.status(400).json({ message: "User already exists" });
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,7 +45,6 @@ exports.register = async (req, res) => {
   }
 };
 
-
 // User Login
 exports.login = async (req, res) => {
   try {
@@ -54,7 +54,8 @@ exports.login = async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
@@ -64,7 +65,11 @@ exports.login = async (req, res) => {
     await user.save();
 
     // Set refresh token as HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
 
     res.json({ accessToken });
   } catch (error) {
@@ -76,21 +81,29 @@ exports.login = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return res.status(403).json({ message: "Access Denied" });
+    if (!refreshToken)
+      return res.status(403).json({ message: "Access Denied" });
 
     const user = await User.findOne({ refreshToken });
-    if (!user) return res.status(403).json({ message: "Invalid Refresh Token" });
+    if (!user)
+      return res.status(403).json({ message: "Invalid Refresh Token" });
 
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-      if (err) return res.status(403).json({ message: "Invalid Refresh Token" });
+      if (err)
+        return res.status(403).json({ message: "Invalid Refresh Token" });
 
-      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+      const { accessToken, refreshToken: newRefreshToken } =
+        generateTokens(user);
 
       // Update refresh token in DB
       user.refreshToken = newRefreshToken;
       user.save();
 
-      res.cookie("refreshToken", newRefreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+      });
       res.json({ accessToken });
     });
   } catch (error) {
@@ -107,7 +120,11 @@ exports.logout = async (req, res) => {
       await user.save();
     }
 
-    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "Strict" });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
     res.json({ message: "Logged out successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error logging out", error });

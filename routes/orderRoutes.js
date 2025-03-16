@@ -1,5 +1,9 @@
 const express = require("express");
-const { getOrders, getTopOrderedProducts, getMonthlyOrders } = require("../controllers/orderController");
+const {
+  getOrders,
+  getTopOrderedProducts,
+  getMonthlyOrders,
+} = require("../controllers/orderController");
 const router = express.Router();
 
 router.get("/", getOrders);

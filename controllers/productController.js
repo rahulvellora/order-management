@@ -6,7 +6,9 @@ exports.addProduct = async (req, res) => {
 
     // Ensure the user is either a Seller or Manufacturer
     if (!["seller", "manufacturer"].includes(req.user.role)) {
-      return res.status(403).json({ message: "Only sellers or manufacturers can add products" });
+      return res
+        .status(403)
+        .json({ message: "Only sellers or manufacturers can add products" });
     }
 
     const product = new Product({
@@ -24,7 +26,6 @@ exports.addProduct = async (req, res) => {
   }
 };
 
-
 exports.changeProductStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -33,8 +34,14 @@ exports.changeProductStatus = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     // Ensure the user is either the Seller or Manufacturer of the product
-    if (![product.seller.toString(), product.manufacturer.toString()].includes(req.user.userId)) {
-      return res.status(403).json({ message: "Unauthorized to update this product" });
+    if (
+      ![product.seller.toString(), product.manufacturer.toString()].includes(
+        req.user.userId
+      )
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this product" });
     }
 
     product.status = status;
@@ -47,10 +54,11 @@ exports.changeProductStatus = async (req, res) => {
   }
 };
 
-
 exports.getFaultyProducts = async (req, res) => {
   try {
-    const products = await Product.find({ status: "faulty" }).populate("manufacturer seller");
+    const products = await Product.find({ status: "faulty" }).populate(
+      "manufacturer seller"
+    );
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: "Error fetching faulty products", error });
